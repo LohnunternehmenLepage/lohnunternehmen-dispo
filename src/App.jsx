@@ -6,7 +6,8 @@ const supabase = createClient(
   'sb_publishable_j226JRfSven0KMeA9zzjMA_DuKX1nP0'
 )
 
-export default function App() {  const [jobs, setJobs] = useState([])
+export default function App() {
+  const [jobs, setJobs] = useState([])
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState({
     kunde: "",
@@ -20,7 +21,16 @@ export default function App() {  const [jobs, setJobs] = useState([])
   }, [])
 
   const loadJobs = async () => {
-    const { data } = await supabase.from('jobs').select('*').order('created_at', { ascending: false })
+    const { data, error } = await supabase
+      .from('jobs')
+      .select('*')
+      .order('created_at', { ascending: false })
+
+    if (error) {
+      console.error(error)
+      return
+    }
+
     setJobs(data || [])
   }
 
@@ -30,7 +40,7 @@ export default function App() {  const [jobs, setJobs] = useState([])
       return
     }
 
-    await supabase.from('jobs').insert([
+    const { error } = await supabase.from('jobs').insert([
       {
         kunde: form.kunde,
         typ: form.typ,
@@ -39,6 +49,12 @@ export default function App() {  const [jobs, setJobs] = useState([])
         status: "Neu"
       }
     ])
+
+    if (error) {
+      console.error(error)
+      alert("Fehler: " + error.message)
+      return
+    }
 
     setForm({
       kunde: "",
